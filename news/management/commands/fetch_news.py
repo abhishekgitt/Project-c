@@ -47,8 +47,10 @@ GDELT_BASE = os.getenv("GDELT_BASE", "https://api.gdeltproject.org/api/v2/doc/do
 GDELT_MAX = int(os.getenv("GDELT_MAX_RECORDS", "50"))
 TOP_N = int(os.getenv("TOP_N", "20"))
 FETCH_INTERVAL = int(os.getenv("FETCH_MIN_INTERVAL_SECONDS", "3600"))
-ARTICLE_FETCH_TIMEOUT = int(os.getenv("ARTICLE_FETCH_TIMEOUT", "10"))
-ARTICLE_FETCH_PAUSE = float(os.getenv("ARTICLE_FETCH_PAUSE_SECONDS", "0.6"))  # polite delay between fetching pages
+ARTICLE_FETCH_TIMEOUT = int(os.getenv("ARTICLE_FETCH_TIMEOUT", "10")) #It sets how long (in seconds) your app will wait
+ARTICLE_FETCH_PAUSE = float(os.getenv("ARTICLE_FETCH_PAUSE_SECONDS", "0.6"))  # delay between fetching pages
+
+#Keywords
 ECON_KEYWORDS = os.getenv("ECON_KEYWORDS", "inflation,gdp,recession,oil,sanction,trade,tariff,currency")
 ECON_KEYWORDS = [k.strip() for k in ECON_KEYWORDS.split(",") if k.strip()]
 
@@ -58,7 +60,8 @@ USER_AGENT = os.getenv("FETCH_USER_AGENT", "geo-econ-fetcher/1.0 (+https://examp
 
 
 def build_gdelt_query(keywords):
-    """Converts them into a GDELT-style search query ,eg: (inflation OR oil+prices OR trade+war)"""
+    """Converts them into a GDELT-style search query and returns it ,
+    eg: (inflation OR oil+prices OR trade+war)"""
     q = " OR ".join(quote_plus(k) for k in keywords)
     return f"({q})"
 
@@ -66,7 +69,7 @@ def build_gdelt_query(keywords):
 
 
 def normalize_article(a: dict):
-    """It takes raw article data (from GDELT / APIs) and them makes a predictable structure """
+    """It takes raw article data (from GDELT / APIs) and them makes a predictable structure and returns it"""
     return {
         "title": a.get("title") or a.get("titleplain") or "",
         "url": a.get("url") or a.get("urlapi") or "",
@@ -82,12 +85,17 @@ def parse_published_at(raw):
     if not raw:
         return None
     try:
-        dt = parser.parse(raw)                      # Converts date strings into Python datetime objects.
+        # Converts raw date strings into Python datetime objects.
+        dt = parser.parse(raw)                      
         if timezone.is_naive(dt):
             dt = timezone.make_aware(dt, timezone.utc)
         return dt
     except Exception:
         return None
+
+
+
+
 
 
 
@@ -97,6 +105,8 @@ def fetch_full_text(url, timeout=ARTICLE_FETCH_TIMEOUT):
     Returns string (may be empty) — never raises.
     Order: newspaper3k -> trafilatura -> BeautifulSoup fallback.
     """
+    #startswith() returns boolean value
+    # Returns empty string if not start with http or any other condition like None,etc.
     if not url or not url.startswith("http"):
         return ""
 
@@ -129,6 +139,7 @@ def fetch_full_text(url, timeout=ARTICLE_FETCH_TIMEOUT):
 
 
     # 3) fallback: fetch raw HTML and extract <article> or <p> tags
+    # header = User agent
     try:
         resp = requests.get(url, timeout=timeout, headers=headers)
         resp.raise_for_status()
@@ -138,7 +149,11 @@ def fetch_full_text(url, timeout=ARTICLE_FETCH_TIMEOUT):
         # prefer <article> tag(s)
         article_tag = soup.find("article")
         if article_tag:
-            paragraphs = [p.get_text(" ", strip=True) for p in article_tag.find_all("p")]
+            paragraphs = [
+                p.get_text(" ", strip=True) 
+                for p in article_tag.find_all("p")
+                ]
+            
             txt = "\n\n".join([p for p in paragraphs if p])
             if len(txt) > 200:
                 return txt.strip()
@@ -155,6 +170,7 @@ def fetch_full_text(url, timeout=ARTICLE_FETCH_TIMEOUT):
         pass
 
     return ""
+
 
 
 
@@ -185,10 +201,12 @@ class Command(BaseCommand):
             "maxrecords": str(GDELT_MAX),
         }
 
+        # Converts the received articles to structured python objects for database
         articles = []
         try:
             resp = requests.get(GDELT_BASE, params=params, timeout=20, headers={"User-Agent": USER_AGENT})
             resp.raise_for_status()
+            # Converts JSON to python dict
             data = resp.json()
             raw_list = data.get("articles") or data.get("artlist") or []
             for a in raw_list:
@@ -201,6 +219,7 @@ class Command(BaseCommand):
             self.stdout.write(self.style.WARNING("No articles returned by GDELT. Done."))
             return
 
+  
         # 3) simple filtering by keywords presence in title/snippet
         filtered = []
         for a in articles:
@@ -212,7 +231,7 @@ class Command(BaseCommand):
             filtered = articles[:TOP_N]
 
         # 4) save top N, create Article and linked SummaryPage
-        saved = 0
+        saved = 0 # How many article is saved 
         seen = set()
 
         for item in filtered[:TOP_N]:
@@ -221,9 +240,10 @@ class Command(BaseCommand):
                 continue
             seen.add(url)
 
-            title = (item.get("title") or "")[:300]
+            title = (item.get("title") or "")[:300] # 300 max limit for the title 
             provided_snippet = (item.get("snippet") or "").strip()
             published_at = parse_published_at(item.get("published_at_raw"))
+
 
             # if provided snippet too short, try to extract full body
             snippet = provided_snippet
@@ -237,11 +257,14 @@ class Command(BaseCommand):
                 except Exception:
                     snippet = snippet or ""
 
+
+
                 # small pause so we don't hammer target sites
                 time.sleep(ARTICLE_FETCH_PAUSE)
 
             try:
-                # Save/update Article (Article now uses 'snippet' field)
+                # Save/update Article
+                # update_or_create() returns object, bool 
                 article_obj, created = Article.objects.update_or_create(
                     url=url,
                     defaults={
