@@ -1,4 +1,4 @@
-from dataclasses import field
+# --- Json converstion ---
 from rest_framework import serializers
 from .models import Article, SummaryPage
 
