@@ -11,7 +11,13 @@ MODEL_NAME = "llama3.1:8b"
 
 REQUEST_TIMEOUT = 300
 # Number of database rows loaded into memory at a time
-CHUNK_SIZE = int(os.getenv("AI_SUMMARY_DB_CHUNK_SIZE",3))
+CHUNK_SIZE = int(os.getenv("AI_SUMMARY_DB_CHUNK_SIZE", 3))
+
+
+def word_count(text: str) -> int:
+    """Return number of words in text"""
+    return len(text.split()) if text else 0
+
 
 def build_prompt(text: str) -> str:
     """
@@ -20,23 +26,22 @@ def build_prompt(text: str) -> str:
     return f"""
 You are a senior economic and geopolitical analyst.
 
-Summarize the news STRICTLY in this order and format.
-Plain English only. Bullet points only.
+Summarize the news in this order and format.
+Plain English only. Include bullet points at last.
 
 Structure:
-- Main topic of the news
-- How this affects the stock market
-- Which stocks or sectors will be impacted
-- Estimated percentage impact on stocks or sectors
-- How this news affects the country's economic growth (percentage estimate)
-- Safer stocks or defensive sectors during this situation
+Explanation of the article in a simple words.
+Don't tell how you going to explain it.
+If news contains negative or positive effect on the economy explain which are the sectors may have effect.
+Tell Estimated percentage impact on stocks and job market\\layoffs impact from this article.
+How this news affects the country's economic growth (percentage estimate), Explain why and how country's economy will change.
+What are the safer stocks to invest in the situation.
 
 Rules:
-- Be realistic with percentages
-- Avoid speculation beyond reasonable estimates
-- No markdown
-- No greetings
-- No extra explanations
+No greetings
+No next question recommendations
+Can be longer
+Keep simpler Explanation
 
 News article:
 {text}
@@ -64,7 +69,6 @@ def generate_summary(text: str) -> str:
     return (response.json().get("response") or "").strip()
 
 
-
 class Command(BaseCommand):
     help = "Generate AI summaries using local LLM"
 
@@ -83,28 +87,16 @@ class Command(BaseCommand):
             article = summary_page.article
             text = (article.snippet or "").strip()
 
-            
-
-        
-            if len(text) < 300:
+            # 🚫 Skip articles with less than 300 WORDS
+            if word_count(text) < 300:
                 self.stdout.write(
-                    self.style.ERROR(
-                        f" SKIPPED! (short content, {len(text)} chars): {article.title[:80]}"
-                        )
+                    self.style.WARNING(
+                        f" SKIPPED (short article, {word_count(text)} words): "
+                        f"{article.title[:80]}"
                     )
-
-                summary_page.ai_summary = (
-                    "Main topic: Insufficient article content\n"
-                    "- Stock market impact: Unable to determine\n"
-                    "- Affected stocks/sectors: Not enough data\n"
-                    "- Estimated impact: 0%\n"
-                    "- Country growth impact: 0%\n"
-                    "- Safer stocks: Large-cap defensive stocks"
                 )
-                summary_page.summarized_at = timezone.now()
-                summary_page.model_version = MODEL_NAME
-                summary_page.confidence = 0.2
-                summary_page.save()
+                # Do NOT save anything
+                # Do NOT mark summarized_at
                 continue
 
             try:
@@ -124,22 +116,11 @@ class Command(BaseCommand):
                 self.stdout.write(self.style.SUCCESS("✔ Summary saved"))
 
             except Exception as e:
-                summary_page.ai_summary = (
-                    "Main topic: AI summarization failed\n"
-                    "- Stock market impact: Unknown\n"
-                    "- Affected stocks/sectors: Unknown\n"
-                    "- Estimated impact: 0%\n"
-                    "- Country growth impact: 0%\n"
-                    "- Safer stocks: Gold, utilities, FMCG"
-                )
-                summary_page.summarized_at = timezone.now()
-                summary_page.model_version = MODEL_NAME
-                summary_page.confidence = 0.1
-                summary_page.save()
-
                 self.stdout.write(
-                    self.style.ERROR(f"Failed: {str(e)}")
+                    self.style.ERROR(f" AI failed, skipping article: {str(e)}")
                 )
+                # ❌ Do NOT mark summarized_at
+                # ❌ Do NOT save fallback summary
+                continue
 
         self.stdout.write(self.style.SUCCESS("AI summarization completed."))
-
