@@ -61,7 +61,7 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [],
-        'APP_DIRS': True,
+        'APP_DIRS': False, 
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.request',
@@ -112,8 +112,9 @@ LANGUAGE_CODE = 'en-us'
 
 TIME_ZONE = 'UTC'
 
+#(True) To handle multiple languages
 USE_I18N = True
-
+# (True) To handle multiple timezone
 USE_TZ = True
 
 
@@ -127,16 +128,17 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-
+# JSON as the default renderer for API responses
 REST_FRAMEWORK = {
     "DEFAULT_RENDERER_CLASSES": [
         "rest_framework.renderers.JSONRenderer",
     ]
 }
 
-#CORS_ALLOWED_ORIGINS = [
+# CORS_ALLOWED_ORIGINS = [
 #    "http://localhost:5173",
 #    "http://127.0.0.1:5173",
-#]
+# ]
+
 
 CORS_ALLOW_ALL_ORIGINS = True

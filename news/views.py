@@ -10,17 +10,18 @@ from news.services.gemini import article_conversation
 class SummaryListAPIView(APIView):
     def get(self, request):
         summaries = SummaryPage.objects.select_related("article").all()
-        serializer = SummaryPageSerializer(summaries, many=True)
+        serializer = SummaryPageSerializer(summaries, many=True)  # Group of objects send through json (many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class ArticleChatAPIView(APIView):
     def post(self, request):
-
+        #Take these data from response
         article_id = request.data.get("article_id")
         summary_id = request.data.get("summary_id")
         user_question = request.data.get("question")
 
+        #If one of the data is missing Response will be an error 
         if not article_id or not summary_id or not user_question:
             return Response(
                 {"error": "article_id, summary_id and question are required"},
@@ -28,19 +29,18 @@ class ArticleChatAPIView(APIView):
             )
 
         try:
+            # Take article data of ai summary and send to gemini api 
             summary = SummaryPage.objects.select_related("article").get(id=summary_id)
         except SummaryPage.DoesNotExist:
+            # if failed
             return Response(
                 {"error": "Summary not found"},
                 status=status.HTTP_404_NOT_FOUND
             )
-
+        # Take article content or it's title
         article_text =  summary.article.snippet or summary.article.title
-        ai_summary = summary.ai_summary
 
         combined_context = f"""
-        AI Summary:
-        {ai_summary}
 
         Full Article:
         {article_text}
