@@ -1,5 +1,7 @@
+import os
 import requests
 from .prompt import build_prompt
+
 
 
 # Ollama config
@@ -7,7 +9,7 @@ OLLAMA_URL = "http://localhost:11434/api/generate"
 MODEL_NAME = "llama3.1:8b"
 
 # Wait maximum 5 minutes for response generation for saving to db
-REQUEST_TIMEOUT = 300
+REQUEST_TIMEOUT = int(os.getenv("REQUEST_TIMEOUT","600"))
 
 def generate_summary(text: str) -> str:
     payload = {
