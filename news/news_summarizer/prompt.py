@@ -5,26 +5,157 @@ def build_prompt(text: str) -> str:
     Strict structured prompt for geo-economic analysis.
     """
     return f"""
-You are a senior economic and geopolitical analyst.
+You are a professional news writer AI.
 
-Summarize the news in this order and format.
-Plain English only. Include bullet points at last.
+TASK:
+Convert the given news information into a well-structured MARKDOWN article.
 
-Structure:
-Explanation of the article in a simple words.
-Don't tell how you going to explain it.
-If news contains negative or positive effect on the economy explain which are the sectors may have effect.
-Tell Estimated percentage impact on stocks and job market\\layoffs impact from this article.
-How this news affects the country's economic growth (percentage estimate), Explain why and how country's economy will change.
-Estimate Trajectory of layoffs going to happen.
-What are the safer stocks to invest in the situation.
+STEP 1 – CLASSIFICATION:
+First, identify the news category from this list:
+- Sports
+- Geopolitics
+- Economy
+- Technology
+- Environment
+- Disaster
+- Science
+- General
 
-Rules:
-No greetings
-No next question recommendations
-Can be longer
-Keep simpler Explanation
+STEP 2 – FORMAT:
+Based on the category, choose the correct MARKDOWN TEMPLATE below
+and generate the article.
 
-News article:
+STRICT RULES:
+- Output ONLY Markdown
+- Do NOT explain your steps
+- Do NOT mention the category explicitly
+- Use emojis where appropriate
+- Use clear headings, bold text, bullet points, and blockquotes
+- Keep tone professional and neutral
+
+--------------------------------------------------
+
+### TEMPLATE: SPORTS
+
+# 🏏 <Match / Event Title>
+
+**📍 Venue:** <venue>  
+**📅 Date:** <date>  
+**🏆 Tournament / Series:** <series>
+
+---
+
+## 🔥 Match Summary
+<short summary>
+
+---
+
+## 📊 Scorecard / Key Stats
+<bullet points>
+
+---
+
+## 🌟 Player of the Match
+<details>
+
+---
+
+## 🔍 Key Moments
+- <moment>
+- <moment>
+
+---
+
+## ⏭️ What’s Next?
+<upcoming info>
+
+--------------------------------------------------
+
+### TEMPLATE: GEOPOLITICS
+
+# 🌍 <Headline>
+
+**📍 Region:** <country/region>  
+**📅 Date:** <date>
+
+---
+
+## 🧠 What Happened?
+<clear explanation>
+
+---
+
+## 🔍 Why It Matters
+- <impact point>
+- <impact point>
+
+---
+
+## 🌐 Global Reactions
+> <quote or summary>
+
+---
+
+## ⏭️ What’s Next?
+<possible outcomes>
+
+--------------------------------------------------
+
+### TEMPLATE: ECONOMY
+
+# 📉 <Headline>
+
+**📍 Country:** <country>  
+**📅 Date:** <date>
+
+---
+
+## 📊 Key Numbers
+- <stat>
+- <stat>
+
+---
+
+## 🧠 What This Means
+<analysis>
+
+---
+
+## 🔮 Outlook
+<future expectation>
+
+--------------------------------------------------
+
+### TEMPLATE: TECHNOLOGY
+
+# 💻 <Headline>
+
+**🏢 Company / Sector:** <name>  
+**📅 Date:** <date>
+
+---
+
+## 🚀 What’s New?
+<update>
+
+---
+
+## ⚙️ How It Works
+<simple explanation>
+
+---
+
+## 🔍 Why It Matters
+- <reason>
+- <reason>
+
+--------------------------------------------------
+
+INPUT NEWS:
+<PASTE RAW NEWS HERE>
+
+NOW GENERATE THE MARKDOWN ARTICLE.
+
+
 {text}
 """

@@ -14,15 +14,22 @@ MODEL_PRIORITY = [
 def article_conversation(article_text: str, user_question: str) -> str:
 
     prompt = f"""
-    1. You are a professional, friendly economic analyst.
-    2. Start conversation without introduction 
-    3. Explalin topic without telling about how you are going to explain it 
-    4. At the end of conversation recommend related topics about the news 
+   You are a helpful assistant.
 
-    Here is a news article:
+I will give you a news article written in Markdown.
+Your job is to:
+
+- Explain the content in simple words
+- Help me understand what happened
+- Answer follow-up questions about the article
+- Keep the tone friendly and conversational
+- Do NOT rewrite the article
+- Do NOT use heavy Markdown formatting
+
+Here is the article:
     {article_text}
 
-    User question:
+    This is the User question about the article:
     {user_question}
 
     Answer in a clear, calm and helpful way.
