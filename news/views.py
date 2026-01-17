@@ -14,10 +14,8 @@ from news.serializers import SummaryPageSerializer
 from news.services.gemini import article_conversation
 
 
-# ============================
-# 🔐 USER REGISTRATION
-# ============================
 
+# sign up new user
 class RegisterAPIView(APIView):
     permission_classes = [AllowAny]
 
@@ -44,7 +42,7 @@ class RegisterAPIView(APIView):
             password=password
         )
 
-        # ✅ create EMPTY user preference (no default topics)
+        # create EMPTY user preference (no default topics)
         UserPreference.objects.create(user=user)
 
         return Response(
@@ -53,10 +51,7 @@ class RegisterAPIView(APIView):
         )
 
 
-# ============================
-# 📚 TOPIC LIST
-# ============================
-
+# List Topics
 class TopicListAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -72,10 +67,8 @@ class TopicListAPIView(APIView):
         ])
 
 
-# ============================
-# 💾 SAVE USER PREFERENCES
-# ============================
 
+# Save UserPreferences
 class SaveUserPreferencesAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -90,10 +83,8 @@ class SaveUserPreferencesAPIView(APIView):
         return Response({"status": "saved"})
 
 
-# ============================
-# 📰 PERSONALIZED SUMMARY LIST
-# ============================
 
+# Check userpreference
 class SummaryListAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -110,7 +101,6 @@ class SummaryListAPIView(APIView):
 
         topics = user_pref.preferred_topics.all()
 
-        # 🚨 no topics selected → onboarding required
         if not topics.exists():
             return Response(
                 {"needs_onboarding": True, "summaries": []},
@@ -125,10 +115,8 @@ class SummaryListAPIView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
-# ============================
-# 💬 ARTICLE CHAT
-# ============================
 
+# Ask about article
 class ArticleChatAPIView(APIView):
     permission_classes = [IsAuthenticated]
 

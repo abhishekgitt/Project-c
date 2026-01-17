@@ -3,6 +3,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import rehypeSanitize from "rehype-sanitize";
 import "./ChatPanel.css";
+import './index.css';
 
 function ChatPanel({ articleId, summaryId }) {
   const [question, setQuestion] = useState("");
@@ -56,7 +57,7 @@ function ChatPanel({ articleId, summaryId }) {
         onKeyDown={(e) => {
           if (e.key === "Enter") {
             e.preventDefault();
-            askAI(); // ✅ send on Enter
+            askAI(); //  send on Enter
           }
         }}
         placeholder="Ask about this article..."
