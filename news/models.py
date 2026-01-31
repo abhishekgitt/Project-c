@@ -10,9 +10,7 @@ class Topic(models.Model):
         return self.name
 
 
-class UserPreference(models.Model):
-    user = models.OneToOneField(User,on_delete=models.CASCADE)
-    preferred_topics = models.ManyToManyField(Topic,blank=True,related_name="intereted_users")
+
 
 class Article(models.Model):
     source = models.CharField(max_length=200)

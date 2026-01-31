@@ -8,7 +8,6 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from news.models import (
     SummaryPage,
     Topic,
-    UserPreference,
 )
 from news.serializers import SummaryPageSerializer
 from news.services.gemini import article_conversation
@@ -42,78 +41,22 @@ class RegisterAPIView(APIView):
             password=password
         )
 
-        # create EMPTY user preference (no default topics)
-        UserPreference.objects.create(user=user)
-
         return Response(
             {"message": "User registered successfully"},
             status=status.HTTP_201_CREATED
         )
 
 
-# List Topics
-class TopicListAPIView(APIView):
-    permission_classes = [IsAuthenticated]
 
-    def get(self, request):
-        topics = Topic.objects.all()
-        return Response([
-            {
-                "id": t.id,
-                "name": t.name,
-                "slug": t.slug
-            }
-            for t in topics
-        ])
-
-
-
-# Save UserPreferences
-class SaveUserPreferencesAPIView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def post(self, request):
-        topic_ids = request.data.get("topics", [])
-
-        pref, _ = UserPreference.objects.get_or_create(user=request.user)
-        pref.preferred_topics.set(
-            Topic.objects.filter(id__in=topic_ids)
-        )
-
-        return Response({"status": "saved"})
-
-
-
-# Check userpreference
+# Check userpreference (Now Global Feed)
 class SummaryListAPIView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
 
     def get(self, request):
-        user = request.user
-
-        try:
-            user_pref = user.userpreference
-        except UserPreference.DoesNotExist:
-            return Response(
-                {"needs_onboarding": True, "summaries": []},
-                status=status.HTTP_200_OK
-            )
-
-        topics = user_pref.preferred_topics.all()
-
-        if not topics.exists():
-            return Response(
-                {"needs_onboarding": True, "summaries": []},
-                status=status.HTTP_200_OK
-            )
-
-        summaries = SummaryPage.objects.filter(
-            article__topics__in=topics
-        ).select_related("article").distinct()
-
+        # Return ALL summaries, latest first
+        summaries = SummaryPage.objects.select_related("article").order_by("-article__published_at")
         serializer = SummaryPageSerializer(summaries, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
-
 
 
 # Ask about article
@@ -141,15 +84,7 @@ class ArticleChatAPIView(APIView):
                 status=status.HTTP_404_NOT_FOUND
             )
 
-        user_topics = request.user.userpreference.preferred_topics.all()
-
-        if not summary.article.topics.filter(
-            id__in=user_topics.values_list("id", flat=True)
-        ).exists():
-            return Response(
-                {"error": "You are not allowed to access this article"},
-                status=status.HTTP_403_FORBIDDEN
-            )
+        # Removed Topic Permission Check - Allow any authenticated user to chat about any article
 
         article_text = summary.article.snippet or summary.article.title
 

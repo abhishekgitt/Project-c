@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion as Motion, AnimatePresence } from "framer-motion";
 import { TrendingUp, Globe, BarChart3, Clock } from "lucide-react";
+import ProfileMenu from "./ProfileMenu";
 import "./Home.css";
 
 function Home() {
@@ -9,27 +10,45 @@ function Home() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+
   const navigate = useNavigate();
   const token = localStorage.getItem("access_token");
 
   useEffect(() => {
+    const headers = {};
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+
     fetch("http://127.0.0.1:8000/api/summaries/", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+      headers: headers,
     })
       .then((res) => {
         if (res.status === 401) {
-          localStorage.clear();
-          navigate("/login");
-          return;
+          // If unauthorized, we just don't show personalized stuff or maybe show public summaries if available.
+          // For now, assuming API returns public summaries or empty list if not logged in, 
+          // OR if the API strictly requires auth, we might need to handle that. 
+          // Based on requirements, "land directly on News Page".
+          // If the backend requires auth for summaries, we might need to adjust backend or show a "Login to view" state.
+          // However, for this step, we just prevent auto-redirect.
+          // If unauthorized, clear token and show public view (Login button will appear)
+          localStorage.removeItem("access_token");
+          localStorage.removeItem("refresh_token");
+          return res.json().catch(() => null);
         }
         return res.json();
       })
       .then((data) => {
-        if (data?.needs_onboarding) {
-          navigate("/select-topics");
+        // If data is null (from catch above) or error
+        if (!data || data.detail) {
+          // handled quietly or show empty state
+          setLoading(false);
           return;
+        }
+
+        if (data?.needs_onboarding) {
+          // Backend no longer sends this, but if it did, we ignore it now. 
+          // Or just remove this block entirely.
         }
 
         setSummaries(data || []);
@@ -40,6 +59,8 @@ function Home() {
         setLoading(false);
       });
   }, [navigate, token]);
+
+
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -72,7 +93,7 @@ function Home() {
         transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
         className="loader"
       />
-      <p>Analyzing global markets...</p>
+      <p>Analyzing job market trends...</p>
     </div>
   );
 
@@ -86,12 +107,18 @@ function Home() {
         transition={{ type: "spring", stiffness: 80, damping: 20 }}
         className="home-header"
       >
-        <div className="header-badge">
-          <Globe size={14} className="icon-pulse" />
-          <span>Real-time Intelligence</span>
+        <div className="header-left">
+          <div className="header-badge">
+            <Globe size={14} className="icon-pulse" />
+            <span>Real-time Intelligence</span>
+          </div>
+          <h1>AI Job Market <br /><span className="gradient-text">Trend Hub</span></h1>
+          <p>Advanced AI-driven analysis of global employment and skill shifts.</p>
         </div>
-        <h1>Geo-Economy <br /><span className="gradient-text">Intelligence Hub</span></h1>
-        <p>Advanced AI-driven analysis of geopolitics and global economic shifts.</p>
+
+        <div className="header-right" style={{ position: 'absolute', top: '20px', right: '20px', zIndex: 10 }}>
+          <ProfileMenu />
+        </div>
       </Motion.header>
 
       <Motion.div
@@ -120,6 +147,10 @@ function Home() {
                   src={item.hero_image || "/static/news/llama-logo.png"}
                   alt="article"
                   loading="lazy"
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.src = "/static/news/default-job.png"; // Fallback if llama-logo fails too? Or just keep it.
+                  }}
                   className={!item.hero_image ? "default-logo" : ""}
                 />
                 <div className="image-overlay" />

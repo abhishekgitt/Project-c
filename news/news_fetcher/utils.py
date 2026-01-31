@@ -1,4 +1,4 @@
-from urllib.parse import quote_plus
+
 from dateutil import parser
 from django.utils import timezone
 
@@ -11,9 +11,10 @@ def word_count(text: str) -> int:
 def build_gdelt_query(keywords):
     """
     Converts them into a GDELT-style search query
-    eg: (inflation OR oil+prices OR trade+war)
+    eg: ("inflation" OR "oil prices" OR "trade war")
     """
-    q = " OR ".join(quote_plus(k) for k in keywords)
+    # Wrap each keyword in quotes to handle multi-word phrases correctly
+    q = " OR ".join(f'"{k}"' for k in keywords)
     return f"({q})"
 
 

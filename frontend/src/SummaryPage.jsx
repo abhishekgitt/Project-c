@@ -3,7 +3,7 @@ import { useEffect, useState, useRef } from "react";
 import { motion as Motion, useScroll, useSpring, useTransform } from "framer-motion";
 import anime from "animejs";
 import { ArrowLeft, Clock, Share2, Bookmark, Sparkles } from "lucide-react";
-import ChatPanel from "./ChatPanel";
+import ProfileMenu from "./ProfileMenu";
 import "./SummaryPage.css"
 
 import ReactMarkdown from "react-markdown";
@@ -70,12 +70,12 @@ function SummaryPage() {
   if (loading) return (
     <div className="status-container">
       <div className="loader" />
-      <p>Fetching intelligence report...</p>
+      <p>Fetching job market analysis...</p>
     </div>
   );
 
   if (error) return <div className="status-container"><p className="error">{error}</p></div>;
-  if (!data) return <div className="status-container"><p>Intelligence report not found.</p></div>;
+  if (!data) return <div className="status-container"><p>Job market report not found.</p></div>;
 
   return (
     <Motion.div
@@ -93,6 +93,32 @@ function SummaryPage() {
         <div className="summary-actions">
           <button className="action-icon"><Bookmark size={18} /></button>
           <button className="action-icon"><Share2 size={18} /></button>
+          <div style={{ marginLeft: "10px" }}>
+            <button
+              className="ai-chat-btn"
+              onClick={() => navigate(`/chat/${id}`)}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                background: 'linear-gradient(135deg, #0071e3 0%, #00a8e8 100%)',
+                border: 'none',
+                padding: '8px 16px',
+                borderRadius: '20px',
+                color: 'white',
+                fontWeight: '600',
+                fontSize: '13px',
+                cursor: 'pointer',
+                boxShadow: '0 4px 12px rgba(0, 113, 227, 0.3)'
+              }}
+            >
+              <Sparkles size={14} fill="white" />
+              Ask Intelligence
+            </button>
+          </div>
+          <div style={{ marginLeft: "10px" }}>
+            <ProfileMenu />
+          </div>
         </div>
       </nav>
 
@@ -123,7 +149,7 @@ function SummaryPage() {
             className={!data.hero_image ? "default-logo" : ""}
           />
           <div className="image-overlay-grad" />
-          <div className="image-caption">Geoeconomic intelligence mapping for {data.article.title}.</div>
+          <div className="image-caption">Job market intelligence mapping for {data.article.title}.</div>
         </div>
 
         <div className="ai-report-section">
@@ -132,7 +158,7 @@ function SummaryPage() {
               <Sparkles size={12} style={{ marginRight: '4px' }} />
               AI INSIGHT
             </div>
-            <h2>Executive Analysis</h2>
+            <h2>Executive Job Market Analysis</h2>
           </div>
 
           <Motion.div
@@ -151,16 +177,7 @@ function SummaryPage() {
         </div>
       </Motion.div>
 
-      <Motion.div
-        initial={{ y: 40, opacity: 0 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-      >
-        <ChatPanel
-          articleId={data.article.id}
-          summaryId={data.id}
-        />
-      </Motion.div>
+
     </Motion.div>
   );
 }

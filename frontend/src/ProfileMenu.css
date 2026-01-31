@@ -1,0 +1,106 @@
+/* Profile Menu Container */
+.profile-menu-container {
+    position: relative;
+    z-index: 1000;
+}
+
+/* Profile Button */
+.profile-btn {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: white;
+    transition: all 0.2s ease;
+}
+
+.profile-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.05);
+}
+
+/* Nav Login Button (Direct) */
+.nav-login-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--accent, #0071e3);
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 20px;
+    /* Pillow shape */
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(0, 113, 227, 0.3);
+}
+
+.nav-login-btn:hover {
+    filter: brightness(1.1);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 113, 227, 0.4);
+}
+
+.nav-login-btn svg {
+    opacity: 0.9;
+}
+
+/* Dropdown Menu */
+.profile-dropdown {
+    position: absolute;
+    top: 50px;
+    right: 0;
+    background: rgba(20, 20, 20, 0.95);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 8px;
+    min-width: 140px;
+    /* Smaller since it just has logout now */
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+    transform-origin: top right;
+}
+
+/* Menu Items */
+.menu-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 10px 12px;
+    background: transparent;
+    border: none;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    text-align: left;
+    text-decoration: none;
+}
+
+/* Logout Item */
+.menu-item.logout {
+    color: #ff4d4d;
+}
+
+.menu-item.logout:hover {
+    background: rgba(255, 77, 77, 0.1);
+}
+
+/* Icons within items */
+.menu-item svg {
+    opacity: 0.8;
+}
+
+.menu-item:hover svg {
+    opacity: 1;
+}

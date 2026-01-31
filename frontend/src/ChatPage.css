@@ -1,0 +1,44 @@
+.chat-page {
+    min-height: 100vh;
+    padding: 80px 40px;
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.chat-page-nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 40px;
+}
+
+.chat-page-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Override ChatPanel styles for full page if needed */
+.chat-page .chat-panel {
+    flex: 1;
+    height: auto;
+    min-height: 600px;
+}
+
+.chat-page .chat-container {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.chat-page .chat-history {
+    flex: 1;
+}
+
+@media (max-width: 768px) {
+    .chat-page {
+        padding: 40px 20px;
+    }
+}

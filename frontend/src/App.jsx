@@ -3,8 +3,8 @@ import { AnimatePresence, motion as Motion } from "framer-motion";
 import Home from "./Home";
 import SummaryPage from "./SummaryPage";
 import Login from "./Login";
-import SelectTopics from "./SelectTopics";
 import Signup from "./Signup";
+import ChatPage from "./ChatPage";
 
 const isAuthenticated = () => {
   return !!localStorage.getItem("access_token");
@@ -39,18 +39,7 @@ function App() {
         <Route
           path="/"
           element={
-            <ProtectedRoute>
-              <PageWrapper><Home /></PageWrapper>
-            </ProtectedRoute>
-          }
-        />
-
-        <Route
-          path="/select-topics"
-          element={
-            <ProtectedRoute>
-              <PageWrapper><SelectTopics /></PageWrapper>
-            </ProtectedRoute>
+            <PageWrapper><Home /></PageWrapper>
           }
         />
 
@@ -59,6 +48,15 @@ function App() {
           element={
             <ProtectedRoute>
               <PageWrapper><SummaryPage /></PageWrapper>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/chat/:id"
+          element={
+            <ProtectedRoute>
+              <PageWrapper><ChatPage /></PageWrapper>
             </ProtectedRoute>
           }
         />
